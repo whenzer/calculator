@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p>
+        <button onclick="calBuild('1');">1</button> <button onclick="calBuild('2');">2</button> <button onclick="calBuild('3');">3</button> <button onclick="calBuild('*');">*</button> <button onclick="backspaceClick();">backspace</button> <button onclick="resetClick();">reset</button> 
+    </p>
+    <p>
+        <button onclick="calBuild('4');">4</button> <button onclick="calBuild('5');">5</button> <button onclick="calBuild('6');">6</button> <button onclick="calBuild('/');">/</button> <button onclick="showHistory();">show history</button> 
+    </p>
+    <p>
+        <button onclick="calBuild('7');">7</button> <button onclick="calBuild('8');">8</button> <button onclick="calBuild('9');">9</button> <button onclick="calBuild('-');">-</button> <button onclick="hideHistory();">hide history</button> 
+    </p>
+    <p>
+        <button onclick="calBuild('.');">.</button> <button onclick="calBuild('0');">0</button> <button onclick="calculate();">=</button> <button onclick="calBuild('+');">+</button> <button onclick="resetHistory();">reset history</button> 
+    </p>
+    
+    <p>your calculation:</p>
+    <p id="calculatorString"></p>
+    <p>your History:</p>
+    <p id="calculatorHistory"></p>
+
+    <script>
+        var calHistory;
+        setCalHistory();
+        function setCalHistory(){
+            calHistory = JSON.parse(localStorage.getItem('calculation')) || {
+                latest: 1,
+                str: '',
+                history: {
+                    
+                }
+            };
+        }
+
+        function hideHistory(){
+            document.getElementById("calculatorHistory").innerHTML = '';
+        }
+        function calBuild(a){
+            calHistory.str += a;
+            document.getElementById("calculatorString").innerHTML = calHistory.str;
+        }
+        
+        function resetHistory(){
+            localStorage.removeItem('calculation');
+            setCalHistory();
+            hideHistory();
+            document.getElementById("calculatorString").innerHTML = calHistory.str;
+        }
+
+        function calculate(){
+            let result = eval(calHistory.str);
+            document.getElementById("calculatorString").innerHTML += ` = ${result}`;
+            if(result !== undefined){
+                let {latest, str} = calHistory;
+                calHistory.history[latest] = {
+                    calculation: str,
+                    result
+                }
+                calHistory.str = result;
+                calHistory.latest += 1;
+                console.log(calHistory);
+            }
+            
+            localStorage.setItem('calculation',JSON.stringify(calHistory));
+        }
+
+        function backspaceClick(){
+            let {str} = calHistory;
+            calHistory.str = str.substring(0, str.length - 1);
+            document.getElementById("calculatorString").innerHTML = calHistory.str;
+        }
+
+        function resetClick(){
+            calHistory.str = '';
+            document.getElementById("calculatorString").innerHTML = calHistory.str;
+        }
+
+        function showHistory(){
+            document.getElementById("calculatorHistory").innerHTML = '';
+            Object.keys(calHistory.history).forEach(key =>{
+                document.getElementById("calculatorHistory").innerHTML += `<br>${key}: calculation = ${calHistory.history[key].calculation} = ${calHistory.history[key].result}`;
+            });
+        }
+    </script>
+</body>
+</html>
